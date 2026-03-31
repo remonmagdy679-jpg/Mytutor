@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vocab Vault — B2→C1</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0f0f13;--surface:#18181f;--surface2:#21212b;--border:#2e2e3d;--accent:#e8c97e;--accent2:#7eb5e8;--accent3:#e87eb5;--text:#e8e8f0;--muted:#7a7a8c;--success:#7ee8a2;--danger:#e87e7e;--radius:16px;--shadow:0 8px 40px rgba(0,0,0,.5)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 20% 10%,rgba(232,201,126,.06) 0%,transparent 60%),radial-gradient(ellipse 40% 60% at 80% 80%,rgba(126,181,232,.05) 0%,transparent 60%);pointer-events:none;z-index:0}
+  #app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:24px 20px 60px}
+  .app-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+  .app-title{font-family:'Playfair Display',serif;font-size:22px;color:var(--accent);letter-spacing:-.3px}
+  .app-title span{font-style:italic;color:var(--muted);font-size:13px;display:block;margin-top:2px;font-family:'DM Sans',sans-serif}
+  .level-badge{background:linear-gradient(135deg,#e8c97e22,#e8c97e11);border:1px solid var(--accent);color:var(--accent);font-size:11px;font-weight:500;letter-spacing:1.5px;padding:4px 12px;border-radius:20px;text-transform:uppercase}
+  .tabs{display:flex;gap:6px;margin-bottom:28px;background:var(--surface);padding:5px;border-radius:12px}
+  .tab-btn{flex:1;padding:9px 8px;border:none;border-radius:8px;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s}
+  .tab-btn.active{background:var(--surface2);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+  .tab-btn:hover:not(.active){color:var(--text)}
+  .stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;text-align:center}
+  .stat-num{font-family:'Playfair Display',serif;font-size:26px;color:var(--accent);line-height:1}
+  .stat-label{font-size:10px;color:var(--muted);margin-top:4px;letter-spacing:.5px;text-transform:uppercase}
+  .card-area{display:flex;flex-direction:column;gap:16px}
+  .flashcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);animation:slideIn .4s cubic-bezier(.16,1,.3,1)}
+  @keyframes slideIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  .card-image-zone{width:100%;height:200px;background:var(--surface2);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .card-image-zone img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
+  .card-image-zone:hover img{transform:scale(1.03)}
+  .img-placeholder{display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--muted)}
+  .img-placeholder svg{width:40px;height:40px;opacity:.4}
+  .img-placeholder span{font-size:12px}
+  .img-upload-btn{position:absolute;bottom:10px;right:10px;background:rgba(15,15,19,.85);border:1px solid var(--border);color:var(--text);font-size:11px;padding:5px 12px;border-radius:8px;cursor:pointer;backdrop-filter:blur(8px);transition:all .2s}
+  .img-upload-btn:hover{background:var(--accent);color:#000;border-color:var(--accent)}
+  .card-body{padding:20px 22px}
+  .word-row{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px}
+  .word-main{font-family:'Playfair Display',serif;font-size:30px;color:var(--text);line-height:1.1}
+  .word-type{font-size:11px;color:var(--accent2);background:rgba(126,181,232,.12);border:1px solid rgba(126,181,232,.25);padding:3px 9px;border-radius:6px;margin-top:6px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;flex-shrink:0}
+  .pronunciation{font-family:'DM Mono',monospace;font-size:13px;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .audio-btn{background:none;border:none;color:var(--accent);cursor:pointer;padding:2px;font-size:16px;transition:transform .2s}
+  .audio-btn:hover{transform:scale(1.2)}
+  .definition{font-size:15px;color:var(--text);line-height:1.6;margin-bottom:16px;padding:12px 14px;background:rgba(232,201,126,.05);border-left:3px solid var(--accent);border-radius:0 8px 8px 0}
+  .examples-label{font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:10px}
+  .example{display:flex;gap:10px;margin-bottom:8px;padding:10px 12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);font-size:13.5px;line-height:1.6}
+  .ex-num{min-width:20px;height:20px;border-radius:50%;background:var(--accent);color:#000;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:2px;flex-shrink:0}
+  .ex-text em{color:var(--accent);font-style:normal;font-weight:500}
+  .card-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+  .tag{font-size:10px;padding:3px 9px;border-radius:6px;text-transform:uppercase;letter-spacing:.5px;font-weight:500}
+  .tag-topic{background:rgba(126,181,232,.12);color:var(--accent2);border:1px solid rgba(126,181,232,.2)}
+  .tag-level{background:rgba(232,201,126,.12);color:var(--accent);border:1px solid rgba(232,201,126,.2)}
+  .review-btns{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)}
+  .review-btn{padding:10px 6px;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;line-height:1.3}
+  .review-btn:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.3)}
+  .btn-again{background:rgba(232,126,126,.15);color:var(--danger);border:1px solid rgba(232,126,126,.3)}
+  .btn-hard{background:rgba(232,201,126,.12);color:#d4a843;border:1px solid rgba(232,201,126,.25)}
+  .btn-good{background:rgba(126,232,162,.12);color:var(--success);border:1px solid rgba(126,232,162,.25)}
+  .btn-easy{background:rgba(126,181,232,.12);color:var(--accent2);border:1px solid rgba(126,181,232,.25)}
+  .btn-next-label{font-size:9px;opacity:.6;display:block;margin-top:2px}
+  .answer-hidden .definition,.answer-hidden .examples-label,.answer-hidden .example,.answer-hidden .review-btns,.answer-hidden .card-tags{display:none}
+  .show-answer-btn{width:100%;padding:13px;margin-top:14px;background:linear-gradient(135deg,rgba(232,201,126,.15),rgba(232,201,126,.05));border:1px solid rgba(232,201,126,.3);border-radius:10px;color:var(--accent);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;letter-spacing:.3px}
+  .show-answer-btn:hover{background:linear-gradient(135deg,rgba(232,201,126,.25),rgba(232,201,126,.1))}
+  .answer-hidden .show-answer-btn{display:block}
+  .answer-shown .show-answer-btn{display:none}
+  .no-cards-msg{text-align:center;padding:60px 20px;color:var(--muted)}
+  .no-cards-msg .big{font-family:'Playfair Display',serif;font-size:48px;margin-bottom:12px}
+  .no-cards-msg p{font-size:14px;line-height:1.7}
+  .progress-ring{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+  .progress-bar-wrap{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+  .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .4s ease}
+  .progress-label{font-size:12px;color:var(--muted);white-space:nowrap}
+  .add-form{display:flex;flex-direction:column;gap:14px}
+  .apikey-box{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+  .apikey-row{display:flex;gap:8px}
+  .apikey-input{flex:1;padding:10px 13px;background:var(--surface);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;outline:none;transition:border-color .2s}
+  .apikey-input:focus{border-color:var(--accent)}
+  .apikey-save-btn{padding:10px 16px;background:var(--accent);border:none;border-radius:9px;color:#000;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+  .ai-input-row{display:flex;gap:10px;align-items:stretch}
+  .ai-word-input{flex:1;padding:14px 16px;background:var(--surface);border:2px solid var(--border);border-radius:12px;color:var(--text);font-family:'Playfair Display',serif;font-size:20px;outline:none;transition:border-color .2s}
+  .ai-word-input:focus{border-color:var(--accent)}
+  .ai-word-input::placeholder{color:var(--muted);font-family:'DM Sans',sans-serif;font-size:15px}
+  .ai-gen-btn{padding:14px 20px;background:linear-gradient(135deg,var(--accent),#d4a843);border:none;border-radius:12px;color:#000;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:8px}
+  .ai-gen-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(232,201,126,.3)}
+  .ai-gen-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+  .ai-tag-row{display:flex;gap:8px;flex-wrap:wrap}
+  .tag-option{padding:6px 14px;background:var(--surface);border:1px solid var(--border);border-radius:20px;color:var(--muted);font-size:12px;cursor:pointer;transition:all .2s;user-select:none}
+  .tag-option.selected{background:rgba(126,181,232,.15);border-color:var(--accent2);color:var(--accent2)}
+  .ai-preview{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;animation:slideIn .3s ease}
+  .ai-preview-header{padding:14px 18px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .ai-preview-title{font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+  .ai-preview-word{font-family:'Playfair Display',serif;font-size:18px;color:var(--accent)}
+  .ai-preview-body{padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+  .ai-field{display:flex;flex-direction:column;gap:4px}
+  .ai-field-label{font-size:10px;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
+  .ai-field-val{font-size:14px;line-height:1.6;color:var(--text)}
+  .ai-field-val.pron{font-family:'DM Mono',monospace;color:var(--accent2)}
+  .ai-field-val.def{padding:10px 12px;background:rgba(232,201,126,.05);border-left:3px solid var(--accent);border-radius:0 8px 8px 0}
+  .ai-field-val.ex{padding:8px 12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border)}
+  .ai-field-val.ex em{color:var(--accent);font-style:normal;font-weight:500}
+  .ai-actions{display:flex;gap:10px;margin-top:4px}
+  .btn-save-word{flex:1;padding:13px;background:linear-gradient(135deg,var(--accent),#d4a843);border:none;border-radius:12px;color:#000;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s}
+  .btn-save-word:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(232,201,126,.3)}
+  .btn-discard{padding:13px 18px;background:transparent;border:1px solid var(--border);border-radius:12px;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all .2s}
+  .btn-discard:hover{border-color:var(--danger);color:var(--danger)}
+  .img-upload-add{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border:1px dashed var(--border);border-radius:10px;cursor:pointer;transition:border-color .2s}
+  .img-upload-add:hover{border-color:var(--accent)}
+  .img-upload-add span{font-size:13px;color:var(--muted)}
+  .img-thumb{width:48px;height:48px;border-radius:8px;object-fit:cover;display:none}
+  .img-thumb.shown{display:block}
+  .loading-state{display:flex;align-items:center;gap:12px;padding:20px;color:var(--muted);font-size:14px}
+  .spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .error-msg{padding:14px 16px;background:rgba(232,126,126,.08);border:1px solid rgba(232,126,126,.25);border-radius:10px;color:var(--danger);font-size:13px;line-height:1.6}
+  .gemini-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--accent2);background:rgba(126,181,232,.1);border:1px solid rgba(126,181,232,.2);padding:3px 10px;border-radius:6px}
+  .word-list{display:flex;flex-direction:column;gap:8px}
+  .word-list-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;transition:all .2s}
+  .word-list-item:hover{border-color:var(--accent);background:var(--surface2)}
+  .wli-left{display:flex;align-items:center;gap:14px}
+  .wli-img{width:44px;height:44px;border-radius:8px;object-fit:cover;border:1px solid var(--border);flex-shrink:0}
+  .wli-img-placeholder{width:44px;height:44px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--muted);font-size:18px;font-family:'Playfair Display',serif}
+  .wli-word{font-family:'Playfair Display',serif;font-size:17px}
+  .wli-def{font-size:12px;color:var(--muted);margin-top:2px}
+  .wli-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+  .interval-badge{font-size:10px;padding:3px 8px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);color:var(--muted)}
+  .delete-btn{background:none;border:none;color:var(--danger);cursor:pointer;font-size:16px;padding:4px;opacity:.5;transition:opacity .2s}
+  .delete-btn:hover{opacity:1}
+  .search-wrap{position:relative;margin-bottom:16px}
+  .search-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);width:16px;height:16px;pointer-events:none}
+  .search-input{width:100%;padding:11px 14px 11px 38px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s}
+  .search-input:focus{border-color:var(--accent)}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 20px;border-radius:10px;font-size:13px;opacity:0;transition:all .3s;box-shadow:var(--shadow);z-index:999;pointer-events:none}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast.success{border-color:var(--success);color:var(--success)}
+  .toast.error{border-color:var(--danger);color:var(--danger)}
+  ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+  @media(max-width:500px){.stats-bar{grid-template-columns:repeat(2,1fr)}.review-btns{grid-template-columns:1fr 1fr}.ai-input-row{flex-direction:column}.word-main{font-size:24px}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="app-header">
+    <div><div class="app-title">Vocab Vault <span>AI-Powered · B2 → C1</span></div></div>
+    <div class="level-badge">Remon</div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('study')">📚 Study</button>
+    <button class="tab-btn" onclick="switchTab('add')">✨ Add Word</button>
+    <button class="tab-btn" onclick="switchTab('list')">📋 All Words</button>
+  </div>
+
+  <!-- STUDY -->
+  <div id="tab-study">
+    <div class="stats-bar">
+      <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-due" style="color:var(--accent3)">0</div><div class="stat-label">Due Today</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-learned" style="color:var(--success)">0</div><div class="stat-label">Learned</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-streak" style="color:var(--accent2)">0</div><div class="stat-label">Streak 🔥</div></div>
+    </div>
+    <div class="progress-ring" id="progress-ring" style="display:none">
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
+      <div class="progress-label" id="progress-label">0 / 0</div>
+    </div>
+    <div class="card-area" id="card-area"></div>
+  </div>
+
+  <!-- ADD WORD -->
+  <div id="tab-add" style="display:none">
+    <div class="add-form">
+
+      <div class="apikey-box">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">🔑 Google Gemini API Key</div>
+            <span class="gemini-badge">✦ Gemini</span>
+          </div>
+          <div id="apikey-status" style="font-size:11px;color:var(--muted)">Not saved</div>
+        </div>
+        <div class="apikey-row">
+          <input class="apikey-input" id="apikey-input" type="password" placeholder="AIza…">
+          <button class="apikey-save-btn" onclick="saveApiKey()">Save</button>
+        </div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.7">
+          Get your free key from <strong style="color:var(--accent2)">aistudio.google.com</strong><br>
+          → Get API Key → Create API Key → Copy it here.<br>
+          Stored only on your device.
+        </div>
+      </div>
+
+      <div style="font-size:13px;color:var(--muted)">Type a word or phrase — AI will fill everything automatically.</div>
+
+      <div class="ai-input-row">
+        <input class="ai-word-input" id="ai-word-input" placeholder="e.g. meticulous, take for granted…" onkeydown="if(event.key==='Enter')generateWord()">
+        <button class="ai-gen-btn" id="ai-gen-btn" onclick="generateWord()"><span>✦</span> Generate</button>
+      </div>
+
+      <div>
+        <div style="font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Topic tag (optional)</div>
+        <div class="ai-tag-row">
+          <div class="tag-option" onclick="toggleTag(this,'TOEFL')">TOEFL</div>
+          <div class="tag-option" onclick="toggleTag(this,'Academic')">Academic</div>
+          <div class="tag-option" onclick="toggleTag(this,'Business')">Business</div>
+          <div class="tag-option" onclick="toggleTag(this,'Idiom')">Idiom</div>
+          <div class="tag-option" onclick="toggleTag(this,'Phrasal Verb')">Phrasal Verb</div>
+          <div class="tag-option" onclick="toggleTag(this,'Everyday')">Everyday</div>
+        </div>
+      </div>
+
+      <div id="ai-result-area"></div>
+    </div>
+  </div>
+
+  <!-- LIST -->
+  <div id="tab-list" style="display:none">
+    <div class="search-wrap">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <input class="search-input" id="search-input" placeholder="Search words…" oninput="renderList()">
+    </div>
+    <div class="word-list" id="word-list"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// SM-2
+function sm2Next(card,rating){
+  let{interval:iv,ease:ea,reps:rp}=card;
+  if(rating===0){rp=0;iv=1;ea=Math.max(1.3,ea-.2)}
+  else if(rating===1){iv=Math.max(1,Math.round(iv*1.2));ea=Math.max(1.3,ea-.15)}
+  else if(rating===2){if(rp===0)iv=1;else if(rp===1)iv=3;else iv=Math.round(iv*ea);rp++}
+  else{if(rp===0)iv=4;else iv=Math.round(iv*ea*1.3);ea=Math.min(2.5,ea+.1);rp++}
+  const nd=new Date();nd.setDate(nd.getDate()+iv);
+  return{...card,interval:iv,ease:ea,reps:rp,nextDue:nd.toISOString()}
+}
+function isDue(c){return !c.nextDue||new Date(c.nextDue)<=new Date()}
+
+// Storage
+const STORE='vocabvault_v2',SK='vv_streak';
+function loadData(){try{return JSON.parse(localStorage.getItem(STORE))||{words:[]}}catch{return{words:[]}}}
+function saveData(d){localStorage.setItem(STORE,JSON.stringify(d))}
+function loadStreak(){try{return JSON.parse(localStorage.getItem(SK))||{count:0,lastDate:''}}catch{return{count:0,lastDate:''}}}
+function bumpStreak(){const s=loadStreak();const today=new Date().toDateString();if(s.lastDate===today)return s.count;const y=new Date();y.setDate(y.getDate()-1);s.count=(s.lastDate===y.toDateString())?s.count+1:1;s.lastDate=today;localStorage.setItem(SK,JSON.stringify(s));return s.count}
+
+// State
+let sessionQueue=[],sessionTotal=0,currentCardIdx=0,pendingWord=null,selectedTag='',addImgData='';
+
+// API Key
+function saveApiKey(){
+  const val=document.getElementById('apikey-input').value.trim();
+  if(!val){showToast('Enter a valid API Key','error');return}
+  localStorage.setItem('vv_apikey',val);
+  document.getElementById('apikey-input').value='';
+  refreshKeyStatus();
+  showToast('API Key saved ✓','success');
+}
+function refreshKeyStatus(){
+  const k=localStorage.getItem('vv_apikey');
+  const el=document.getElementById('apikey-status');
+  if(!el)return;
+  if(k){el.textContent='✓ Saved';el.style.color='var(--success)'}
+  else{el.textContent='Not saved';el.style.color='var(--muted)'}
+}
+
+// Tabs
+function switchTab(t){
+  ['study','add','list'].forEach(x=>document.getElementById('tab-'+x).style.display=x===t?'block':'none');
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['study','add','list'][i]===t));
+  if(t==='study')renderStudy();
+  if(t==='list')renderList();
+  if(t==='add')refreshKeyStatus();
+}
+
+// Stats
+function updateStats(){
+  const d=loadData();
+  document.getElementById('stat-total').textContent=d.words.length;
+  document.getElementById('stat-due').textContent=d.words.filter(isDue).length;
+  document.getElementById('stat-learned').textContent=d.words.filter(w=>w.reps>0).length;
+  document.getElementById('stat-streak').textContent=loadStreak().count;
+}
+
+// Tag
+function toggleTag(el,tag){
+  document.querySelectorAll('.tag-option').forEach(t=>t.classList.remove('selected'));
+  if(selectedTag===tag){selectedTag=''}else{el.classList.add('selected');selectedTag=tag}
+}
+
+// Generate via Gemini
+async function generateWord(){
+  const word=document.getElementById('ai-word-input').value.trim();
+  if(!word)return;
+  const apiKey=localStorage.getItem('vv_apikey')||'';
+  const area=document.getElementById('ai-result-area');
+  if(!apiKey){
+    area.innerHTML=`<div class="error-msg">⚠ Please save your Gemini API Key first in the box above.</div>`;
+    return;
+  }
+  const btn=document.getElementById('ai-gen-btn');
+  btn.disabled=true;
+  area.innerHTML=`<div class="loading-state"><div class="spinner"></div>Generating card for "<strong style="color:var(--accent)">${word}</strong>"…</div>`;
+  pendingWord=null;addImgData='';
+
+  const prompt=`You are an English vocabulary assistant helping a B2-level Egyptian learner reach C1.
+
+Generate a vocabulary card for: "${word}"
+
+Respond ONLY with a valid JSON object, no markdown, no extra text, no backticks:
+{
+  "word": "exact word or phrase",
+  "type": "one of: adjective, verb, noun, adverb, phrase, idiom, phrasal verb, collocation",
+  "pronunciation": "IPA like /wɜːrd/",
+  "definition": "Clear English definition for B2-C1 learner. One or two sentences.",
+  "example1": "Natural sentence using the word. Word must appear in it.",
+  "example2": "Second natural sentence in a different context. Word must appear."
+}`;
+
+  try{
+    const url=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    const res=await fetch(url,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        contents:[{parts:[{text:prompt}]}],
+        generationConfig:{temperature:0.7,maxOutputTokens:800}
+      })
+    });
+    const data=await res.json();
+    if(data.error){throw new Error(data.error.message||'Gemini API error')}
+    const raw=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+    const clean=raw.replace(/```json|```/g,'').trim();
+    const parsed=JSON.parse(clean);
+    pendingWord={...parsed,tag:selectedTag,image:'',interval:1,ease:2.5,reps:0,nextDue:new Date().toISOString(),added:new Date().toISOString(),id:'w_'+Date.now()};
+    renderAIPreview(pendingWord);
+  }catch(e){
+    area.innerHTML=`<div class="error-msg">⚠ Error: ${e.message||'Failed to generate. Check your API Key and try again.'}</div>`;
+  }
+  btn.disabled=false;
+}
+
+function renderAIPreview(w){
+  document.getElementById('ai-result-area').innerHTML=`
+    <div class="ai-preview">
+      <div class="ai-preview-header">
+        <div class="ai-preview-title">✦ Gemini Generated</div>
+        <div class="ai-preview-word">${w.word}</div>
+      </div>
+      <div class="ai-preview-body">
+        <div class="ai-field"><div class="ai-field-label">Type</div><div class="ai-field-val"><span class="tag tag-topic">${w.type}</span></div></div>
+        <div class="ai-field"><div class="ai-field-label">Pronunciation</div><div class="ai-field-val pron">${w.pronunciation} <button class="audio-btn" onclick="speakWord('${w.word.replace(/'/g,"\\'")}')">🔊</button></div></div>
+        <div class="ai-field"><div class="ai-field-label">Definition</div><div class="ai-field-val def">${w.definition}</div></div>
+        <div class="ai-field"><div class="ai-field-label">Example 1</div><div class="ai-field-val ex">${hl(w.example1,w.word)}</div></div>
+        <div class="ai-field"><div class="ai-field-label">Example 2</div><div class="ai-field-val ex">${hl(w.example2,w.word)}</div></div>
+        <div class="ai-field">
+          <div class="ai-field-label">Image (optional)</div>
+          <input type="file" id="add-img-file" accept="image/*" style="display:none" onchange="handleAddImg(event)">
+          <div class="img-upload-add" onclick="document.getElementById('add-img-file').click()">
+            <img class="img-thumb" id="add-img-thumb" alt="">
+            <span id="add-img-label">📷 Tap to add an image</span>
+          </div>
+        </div>
+        <div class="ai-actions">
+          <button class="btn-save-word" onclick="saveGeneratedWord()">Save to My Deck →</button>
+          <button class="btn-discard" onclick="document.getElementById('ai-result-area').innerHTML='';pendingWord=null">Discard</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function handleAddImg(e){
+  const file=e.target.files[0];if(!file)return;
+  const r=new FileReader();r.onload=ev=>{
+    addImgData=ev.target.result;
+    const t=document.getElementById('add-img-thumb');t.src=addImgData;t.classList.add('shown');
+    document.getElementById('add-img-label').textContent='✓ Image added';
+  };r.readAsDataURL(file);
+}
+
+function saveGeneratedWord(){
+  if(!pendingWord)return;
+  pendingWord.image=addImgData;
+  const d=loadData();
+  if(d.words.find(w=>w.word.toLowerCase()===pendingWord.word.toLowerCase())){showToast('"'+pendingWord.word+'" already exists!','error');return}
+  d.words.push(pendingWord);saveData(d);
+  showToast('"'+pendingWord.word+'" saved! ✓','success');
+  document.getElementById('ai-word-input').value='';
+  document.getElementById('ai-result-area').innerHTML='';
+  pendingWord=null;addImgData='';
+  updateStats();sessionQueue=[];
+}
+
+// Study
+function renderStudy(){
+  updateStats();const d=loadData();const due=d.words.filter(isDue);
+  if(!due.length){
+    sessionQueue=[];document.getElementById('progress-ring').style.display='none';
+    document.getElementById('card-area').innerHTML=`<div class="no-cards-msg"><div class="big">✨</div><p>No words due right now!<br><span style="color:var(--accent)">Add new words</span> or come back later.<br><br>${d.words.length===0?'Go to <strong style="color:var(--accent2)">Add Word</strong> to start.':'Great job — all caught up.'}</p></div>`;return;
+  }
+  if(!sessionQueue.length||currentCardIdx>=sessionQueue.length){sessionQueue=[...due].sort(()=>Math.random()-.5);sessionTotal=sessionQueue.length;currentCardIdx=0}
+  const pct=Math.round(currentCardIdx/sessionTotal*100);
+  document.getElementById('progress-ring').style.display='flex';
+  document.getElementById('progress-fill').style.width=pct+'%';
+  document.getElementById('progress-label').textContent=currentCardIdx+' / '+sessionTotal;
+  renderCard(sessionQueue[currentCardIdx]);
+}
+
+function renderCard(w){
+  const imgH=w.image?`<img src="${w.image}" alt="${w.word}" style="width:100%;height:100%;object-fit:cover">`:`<div class="img-placeholder"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><span>No image yet</span></div>`;
+  const ex2H=w.example2?`<div class="example"><span class="ex-num">2</span><span class="ex-text">${hl(w.example2,w.word)}</span></div>`:'';
+  const iv=w.interval||1;const ea=w.ease||2.5;const rp=w.reps||0;
+  const nxt={0:'<1d',1:'~'+Math.max(1,Math.round(iv*1.2))+'d',2:'~'+(rp<2?(rp===0?1:3):Math.round(iv*ea))+'d',3:'~'+Math.round(iv*ea*1.3)+'d'};
+  document.getElementById('card-area').innerHTML=`
+    <div class="flashcard answer-hidden" id="current-card">
+      <div class="card-image-zone">${imgH}
+        <label class="img-upload-btn" for="card-img-up">📷 Change image</label>
+        <input type="file" id="card-img-up" accept="image/*" style="display:none" onchange="updateCardImage(event,'${w.id}')">
+      </div>
+      <div class="card-body">
+        <div class="word-row"><div><div class="word-main">${w.word}</div></div><span class="word-type">${w.type||'word'}</span></div>
+        <div class="pronunciation"><span>${w.pronunciation||''}</span>${w.pronunciation?`<button class="audio-btn" onclick="speakWord('${w.word.replace(/'/g,"\\'")}')">🔊</button>`:''}</div>
+        <button class="show-answer-btn" onclick="showAnswer()">Tap to reveal definition →</button>
+        <div class="definition">${w.definition}</div>
+        <div class="examples-label">Examples in context</div>
+        <div class="example"><span class="ex-num">1</span><span class="ex-text">${hl(w.example1,w.word)}</span></div>
+        ${ex2H}
+        <div class="card-tags">
+          ${w.tag?`<span class="tag tag-topic">${w.tag}</span>`:''}
+          <span class="tag tag-level">${rp>5?'Mastered':rp>0?'Learning':'New'}</span>
+          ${iv>1?`<span class="tag" style="background:rgba(200,200,200,.08);color:var(--muted);border:1px solid var(--border)">Every ${iv}d</span>`:''}
+        </div>
+        <div class="review-btns">
+          <button class="review-btn btn-again" onclick="reviewCard(0,'${w.id}')">✗ Again<span class="btn-next-label">${nxt[0]}</span></button>
+          <button class="review-btn btn-hard" onclick="reviewCard(1,'${w.id}')">~ Hard<span class="btn-next-label">${nxt[1]}</span></button>
+          <button class="review-btn btn-good" onclick="reviewCard(2,'${w.id}')">✓ Good<span class="btn-next-label">${nxt[2]}</span></button>
+          <button class="review-btn btn-easy" onclick="reviewCard(3,'${w.id}')">✦ Easy<span class="btn-next-label">${nxt[3]}</span></button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function hl(text,word){
+  if(!text||!word)return text||'';
+  const parts=word.toLowerCase().split(' ');
+  let r=text;
+  parts.forEach(p=>{const b=p.replace(/[^a-z]/g,'');if(b.length<3)return;r=r.replace(new RegExp('('+b+'\\w*)','gi'),'<em>$1</em>')});
+  return r;
+}
+function showAnswer(){const c=document.getElementById('current-card');c.classList.remove('answer-hidden');c.classList.add('answer-shown');bumpStreak();updateStats()}
+function reviewCard(rating,id){
+  const d=loadData();const idx=d.words.findIndex(w=>w.id===id);
+  if(idx>=0){d.words[idx]=sm2Next(d.words[idx],rating);saveData(d)}
+  currentCardIdx++;
+  if(currentCardIdx>=sessionQueue.length){sessionQueue=[];showToast('Session complete! 🎉','success');setTimeout(()=>renderStudy(),500)}
+  else renderStudy();
+}
+function speakWord(word){if('speechSynthesis'in window){const u=new SpeechSynthesisUtterance(word);u.lang='en-US';u.rate=.85;speechSynthesis.speak(u)}}
+function updateCardImage(event,id){
+  const file=event.target.files[0];if(!file)return;
+  const r=new FileReader();r.onload=e=>{const d=loadData();const idx=d.words.findIndex(w=>w.id===id);if(idx>=0){d.words[idx].image=e.target.result;saveData(d);renderStudy()}};r.readAsDataURL(file);
+}
+
+// List
+function renderList(){
+  const d=loadData();const q=(document.getElementById('search-input')?.value||'').toLowerCase();
+  let words=d.words;if(q)words=words.filter(w=>w.word.toLowerCase().includes(q)||w.definition.toLowerCase().includes(q)||(w.tag||'').toLowerCase().includes(q));
+  const list=document.getElementById('word-list');
+  if(!words.length){list.innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted);font-size:14px">No words found.</div>`;return}
+  list.innerHTML=words.map(w=>`<div class="word-list-item" onclick="jumpToCard('${w.id}')"><div class="wli-left">${w.image?`<img class="wli-img" src="${w.image}">`:`<div class="wli-img-placeholder">${w.word[0].toUpperCase()}</div>`}<div><div class="wli-word">${w.word}</div><div class="wli-def">${(w.definition||'').substring(0,55)}${(w.definition||'').length>55?'…':''}</div></div></div><div class="wli-right"><span class="interval-badge">${isDue(w)?'⚡ due':'in '+w.interval+'d'}</span><button class="delete-btn" onclick="deleteWord(event,'${w.id}')">✕</button></div></div>`).join('');
+}
+function jumpToCard(id){const d=loadData();const w=d.words.find(x=>x.id===id);if(!w)return;switchTab('study');sessionQueue=[w];sessionTotal=1;currentCardIdx=0;renderCard(w)}
+function deleteWord(event,id){event.stopPropagation();if(!confirm('Delete?'))return;const d=loadData();d.words=d.words.filter(w=>w.id!==id);saveData(d);renderList();updateStats();showToast('Deleted')}
+
+// Toast
+function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(type?' '+type:'');setTimeout(()=>t.className='toast',2500)}
+
+// Boot
+updateStats();renderStudy();
+</script>
+</body>
+</html>
